@@ -1,0 +1,17 @@
+{
+	"ImportPath": "github.com/empirefox/gotool",
+	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/golang/glog",
+			"Rev": "44145f04b68cf362d9c4df2182967c2275eaefed"
+		},
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "1551221275a7bd42978745a376b2531f791d88f3"
+		}
+	]
+}
