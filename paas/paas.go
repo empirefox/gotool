@@ -74,7 +74,7 @@ func GetBindAddr() string {
 		return fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
 	}
 	// must be test mode
-	return "0.0.0.0:9999"
+	return "0.0.0.0:" + GetEnv("PORT", "9999")
 }
 
 // TODO test with custom domain
@@ -96,7 +96,7 @@ func GetSubDomain() string {
 		return os.Getenv("OPENSHIFT_APP_DNS")
 	}
 	// must be test mode
-	return "127.0.0.1:9999"
+	return "127.0.0.1:" + GetEnv("PORT", "9999")
 }
 
 func GetGorm() Gorm {
