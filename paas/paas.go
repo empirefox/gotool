@@ -20,6 +20,13 @@ var (
 	SubDomain  string
 )
 
+type Gorm struct {
+	Dialect string
+	Url     string
+	MaxIdle int
+	MaxOpen int
+}
+
 func init() {
 	PaasVendor = GetPaasVendor()
 	IsDevMode = CheckIsDev()
@@ -90,4 +97,40 @@ func GetSubDomain() string {
 	}
 	// must be test mode
 	return "127.0.0.1:9999"
+}
+
+func GetGorm() Gorm {
+	switch PaasVendor {
+	case HEROKU:
+		return Gorm{
+			Dialect: "postgres",
+			Url:     os.Getenv("DATABASE_URL"),
+			MaxIdle: 20,
+			MaxOpen: 20,
+		}
+	case CLOUD_CONTROL:
+		return Gorm{
+			Dialect: "postgres",
+			Url:     os.Getenv("ELEPHANTSQL_URL"),
+			MaxIdle: 5,
+			MaxOpen: 5,
+		}
+	case OPENSHIFT:
+		// Vendor default value is 100
+		// Can be set by OPENSHIFT_POSTGRESQL_MAX_CONNECTIONS
+		// We only use 20 for now
+		return Gorm{
+			Dialect: "postgres",
+			Url:     os.Getenv("OPENSHIFT_POSTGRESQL_DB_URL") + "/" + os.Getenv("OPENSHIFT_APP_NAME"),
+			MaxIdle: 20,
+			MaxOpen: 20,
+		}
+	}
+	// must be test mode
+	return Gorm{
+		Dialect: "postgres",
+		Url:     os.Getenv("DB_URL"),
+		MaxIdle: 5,
+		MaxOpen: 5,
+	}
 }
