@@ -37,6 +37,14 @@ func init() {
 	}
 }
 
+func IsSystemMode() bool {
+	switch strings.ToLower(os.Getenv("SYSTEM_MODE_ON")) {
+	case "true", "yes", "1", "on", "ok":
+		return true
+	}
+	return false
+}
+
 func GetPaasVendor() string {
 	if os.Getenv("DYNO") != "" {
 		return HEROKU
