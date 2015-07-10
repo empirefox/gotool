@@ -129,7 +129,9 @@ func GetGorm() Gorm {
 		// We only use 20 for now
 		return Gorm{
 			Dialect: "postgres",
-			Url:     os.Getenv("OPENSHIFT_POSTGRESQL_DB_URL") + "/" + os.Getenv("OPENSHIFT_APP_NAME"),
+			Url: fmt.Sprintf("%s/%s?sslmode=disable",
+				os.Getenv("OPENSHIFT_POSTGRESQL_DB_URL"),
+				os.Getenv("OPENSHIFT_APP_NAME")),
 			MaxIdle: 20,
 			MaxOpen: 20,
 		}
