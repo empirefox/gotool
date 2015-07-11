@@ -18,6 +18,7 @@ var (
 	IsDevMode  bool
 	BindAddr   string
 	SubDomain  string
+	PortInTest string
 )
 
 type Gorm struct {
@@ -28,6 +29,7 @@ type Gorm struct {
 }
 
 func init() {
+	PortInTest = GetEnv("PORT", "9999")
 	PaasVendor = GetPaasVendor()
 	IsDevMode = CheckIsDev()
 	BindAddr = GetBindAddr()
@@ -71,6 +73,18 @@ func GetEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
+// access from client
+func GetWsPorts() (ws, wss string) {
+	switch PaasVendor {
+	case HEROKU, CLOUD_CONTROL:
+		return "80", "443"
+	case OPENSHIFT:
+		return "8000", "8443"
+	}
+	// must be test mode
+	return PortInTest, PortInTest
+}
+
 func GetBindAddr() string {
 	// all copy from the official examples
 	switch PaasVendor {
@@ -82,11 +96,14 @@ func GetBindAddr() string {
 		return fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
 	}
 	// must be test mode
-	return "0.0.0.0:" + GetEnv("PORT", "9999")
+	return "0.0.0.0:" + PortInTest
 }
 
 // TODO test with custom domain
 func GetSubDomain() string {
+	if sd := os.Getenv("PUBLIC_DOMAIN"); sd != "" {
+		return sd
+	}
 	switch PaasVendor {
 	case HEROKU:
 		// not supported
@@ -104,10 +121,19 @@ func GetSubDomain() string {
 		return os.Getenv("OPENSHIFT_APP_DNS")
 	}
 	// must be test mode
-	return "127.0.0.1:" + GetEnv("PORT", "9999")
+	return "127.0.0.1:" + PortInTest
 }
 
 func GetGorm() Gorm {
+	if url := os.Getenv("DB_URL"); url != "" {
+		// useful in test
+		return Gorm{
+			Dialect: "postgres",
+			Url:     url,
+			MaxIdle: 5,
+			MaxOpen: 5,
+		}
+	}
 	switch PaasVendor {
 	case HEROKU:
 		return Gorm{
@@ -117,11 +143,24 @@ func GetGorm() Gorm {
 			MaxOpen: 20,
 		}
 	case CLOUD_CONTROL:
+		if url := os.Getenv("ELEPHANTSQL_URL"); url != "" {
+			return Gorm{
+				Dialect: "postgres",
+				Url:     url,
+				MaxIdle: 5,
+				MaxOpen: 5,
+			}
+		}
 		return Gorm{
-			Dialect: "postgres",
-			Url:     os.Getenv("ELEPHANTSQL_URL"),
-			MaxIdle: 5,
-			MaxOpen: 5,
+			Dialect: "mysql",
+			Url: fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8",
+				os.Getenv("MYSQLS_USERNAME"),
+				os.Getenv("MYSQLS_PASSWORD"),
+				os.Getenv("MYSQLS_HOSTNAME"),
+				os.Getenv("MYSQLS_PORT"),
+				os.Getenv("MYSQLS_DATABASE")),
+			MaxIdle: 2,
+			MaxOpen: 2,
 		}
 	case OPENSHIFT:
 		// Vendor default value is 100
@@ -136,11 +175,5 @@ func GetGorm() Gorm {
 			MaxOpen: 20,
 		}
 	}
-	// must be test mode
-	return Gorm{
-		Dialect: "postgres",
-		Url:     os.Getenv("DB_URL"),
-		MaxIdle: 5,
-		MaxOpen: 5,
-	}
+	panic("db param must be set, like DB_URL")
 }

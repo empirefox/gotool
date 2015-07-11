@@ -1,19 +1,20 @@
 package dp
 
+import "github.com/empirefox/gotool/paas"
+
 var (
 	Mode DevOrProd
 )
 
 type DevOrProd struct {
-	IsDev      bool
-	HttpProto  string
-	HttpPrefix string
-	WsProto    string
-	WsPrefix   string
+	IsDev     bool
+	HttpProto string
+	WsProto   string
+	WsPort    string
 }
 
 func init() {
-	if Mode.HttpPrefix == "" {
+	if Mode.HttpProto == "" {
 		SetDevMode(false)
 	}
 }
@@ -22,13 +23,11 @@ func SetDevMode(isDev bool) {
 	Mode.IsDev = isDev
 	if isDev {
 		Mode.HttpProto = "http"
-		Mode.HttpPrefix = "http://"
 		Mode.WsProto = "ws"
-		Mode.WsPrefix = "ws://"
+		Mode.WsPort, _ = paas.GetWsPorts()
 	} else {
 		Mode.HttpProto = "https"
-		Mode.HttpPrefix = "https://"
 		Mode.WsProto = "wss"
-		Mode.WsPrefix = "wss://"
+		_, Mode.WsPort = paas.GetWsPorts()
 	}
 }
