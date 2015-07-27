@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// We decide by the first match
 func AcceptJson(r *http.Request) bool {
 	accept := r.Header.Get("Accept")
 	if accept == "" {
@@ -16,6 +17,8 @@ func AcceptJson(r *http.Request) bool {
 		switch mediaType {
 		case "*/*", "application/*", "application/json":
 			return true
+		case "text/html", "text/plain":
+			return false
 		}
 	}
 	return false
