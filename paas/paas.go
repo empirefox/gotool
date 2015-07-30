@@ -121,7 +121,7 @@ func GetSubDomain() string {
 		return os.Getenv("OPENSHIFT_APP_DNS")
 	}
 	// must be test mode
-	return "127.0.0.1:" + PortInTest
+	return "127.0.0.1"
 }
 
 func GetGorm() Gorm {
