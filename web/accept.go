@@ -23,3 +23,8 @@ func AcceptJson(r *http.Request) bool {
 	}
 	return false
 }
+
+func RequestJson(r *http.Request) bool {
+	content, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	return content == "application/json"
+}
