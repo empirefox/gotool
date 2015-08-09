@@ -139,16 +139,16 @@ func GetGorm() Gorm {
 		return Gorm{
 			Dialect: "postgres",
 			Url:     os.Getenv("DATABASE_URL"),
-			MaxIdle: 20,
-			MaxOpen: 20,
+			MaxIdle: 19,
+			MaxOpen: 19,
 		}
 	case CLOUD_CONTROL:
 		if url := os.Getenv("ELEPHANTSQL_URL"); url != "" {
 			return Gorm{
 				Dialect: "postgres",
 				Url:     url,
-				MaxIdle: 5,
-				MaxOpen: 5,
+				MaxIdle: 4,
+				MaxOpen: 4,
 			}
 		}
 		return Gorm{
@@ -159,8 +159,8 @@ func GetGorm() Gorm {
 				os.Getenv("MYSQLS_HOSTNAME"),
 				os.Getenv("MYSQLS_PORT"),
 				os.Getenv("MYSQLS_DATABASE")),
-			MaxIdle: 2,
-			MaxOpen: 2,
+			MaxIdle: 1,
+			MaxOpen: 1,
 		}
 	case OPENSHIFT:
 		// Vendor default value is 100
