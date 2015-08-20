@@ -93,7 +93,7 @@ func GetBindAddr() string {
 	case CLOUD_CONTROL:
 		return fmt.Sprintf(":%v", GetEnv("PORT", "8080"))
 	case OPENSHIFT:
-		return fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
+		return fmt.Sprintf("%s:%s", os.Getenv("OPENSHIFT_GO_IP"), os.Getenv("OPENSHIFT_GO_PORT"))
 	}
 	// must be test mode
 	return "0.0.0.0:" + PortInTest

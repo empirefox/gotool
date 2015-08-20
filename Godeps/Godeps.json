@@ -1,17 +1,31 @@
 {
 	"ImportPath": "github.com/empirefox/gotool",
-	"GoVersion": "go1.4.2",
+	"GoVersion": "go1.5",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/golang/glog",
-			"Rev": "44145f04b68cf362d9c4df2182967c2275eaefed"
+			"Rev": "fca8c8854093a154ff1eb580aae10276ad6b1b5f"
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",
-			"Rev": "1551221275a7bd42978745a376b2531f791d88f3"
+			"Rev": "b6ab76f1fe9803ee1d59e7e5b2a797c1fe897ce5"
+		},
+		{
+			"ImportPath": "github.com/jtolds/gls",
+			"Rev": "9a4a02dbe491bef4bab3c24fd9f3087d6c4c6690"
+		},
+		{
+			"ImportPath": "github.com/smartystreets/assertions",
+			"Comment": "1.5.0-397-gac6b6f6",
+			"Rev": "ac6b6f68ca3d6ac00a360d0fad0c844859ad131b"
+		},
+		{
+			"ImportPath": "github.com/smartystreets/goconvey/convey",
+			"Comment": "1.5.0-412-gbf05a3a",
+			"Rev": "bf05a3a16dad006e63e899124a2c6125028f6b31"
 		}
 	]
 }
