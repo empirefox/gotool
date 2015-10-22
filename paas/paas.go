@@ -185,7 +185,7 @@ func getBluemix() info {
 	domain := domainRegexp.FindStringSubmatch(os.Getenv("VCAP_APPLICATION"))[1]
 	return info{
 		Vendor:   BLUEMIX,
-		BindAddr: os.Getenv("CF_INSTANCE_ADDR"),
+		BindAddr: fmt.Sprintf(":%v", os.Getenv("CF_INSTANCE_PORT")),
 		ApiInfo: ApiInfo{
 			HttpDomain: domain,
 			WsDomain:   domain,
