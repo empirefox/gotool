@@ -185,7 +185,7 @@ func getBluemix() info {
 	domain := domainRegexp.FindStringSubmatch(os.Getenv("VCAP_APPLICATION"))[1]
 	return info{
 		Vendor:   BLUEMIX,
-		BindAddr: fmt.Sprintf(":%v", os.Getenv("CF_INSTANCE_PORT")),
+		BindAddr: fmt.Sprintf("%v:%v", os.Getenv("VCAP_APP_HOST"), os.Getenv("VCAP_APP_PORT")),
 		ApiInfo: ApiInfo{
 			HttpDomain: domain,
 			WsDomain:   domain,
@@ -193,7 +193,7 @@ func getBluemix() info {
 		},
 		GormParams: GormParams{
 			Dialect: "postgres",
-			Url:     os.Getenv("DATABASE_URL"),
+			Url:     os.Getenv("DATABASE_URL") + "?sslmode=disable",
 			MaxIdle: 19,
 			MaxOpen: 19,
 		},
