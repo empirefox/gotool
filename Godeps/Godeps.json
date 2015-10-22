@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/empirefox/gotool",
-	"GoVersion": "go1.5",
+	"GoVersion": "go1.5.1",
 	"Packages": [
 		"./..."
 	],
@@ -11,7 +11,7 @@
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",
-			"Rev": "b6ab76f1fe9803ee1d59e7e5b2a797c1fe897ce5"
+			"Rev": "423912737d2c26382ab4b2647d796811d4efa00b"
 		},
 		{
 			"ImportPath": "github.com/jtolds/gls",
