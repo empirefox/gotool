@@ -6,6 +6,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/golang/glog"
 )
 
 const (
@@ -203,7 +205,7 @@ func getBluemix() info {
 func getTest() info {
 	url := os.Getenv("DB_URL")
 	if url == "" {
-		panic("db param must be set, like DB_URL")
+		glog.Errorln("db param must be set in dev mode, like DB_URL")
 	}
 	return info{
 		Vendor:   "",
