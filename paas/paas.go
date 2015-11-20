@@ -95,7 +95,7 @@ func getDaocloud() info {
 		},
 		GormParams: GormParams{
 			Dialect: "mysql",
-			Url: fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
+			Url: fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8&parseTime=True",
 				os.Getenv("MYSQL_USERNAME"), os.Getenv("MYSQL_PASSWORD"),
 				os.Getenv("MYSQL_PORT_3306_TCP_ADDR"),
 				os.Getenv("MYSQL_INSTANCE_NAME"),
