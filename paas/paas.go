@@ -16,6 +16,7 @@ const (
 	CLOUD_CONTROL  = "cloudControl"
 	CLOUD_AND_HEAT = "cloudandheat"
 	BLUEMIX        = "bluemix"
+	DAOCLOUD       = "daocloud"
 )
 
 var (
@@ -63,20 +64,46 @@ func init() {
 }
 
 func GetPaasInfo() info {
-	if os.Getenv("DYNO") != "" {
+	switch {
+	case os.Getenv("PAAS_VENDOR") == CLOUD_CONTROL:
+		// also fit for dotcloud
+		return getCloudControl()
+	case os.Getenv("DYNO") != "":
 		return getHeroku()
-	}
-	if os.Getenv("OPENSHIFT_APP_NAME") != "" {
+	case os.Getenv("OPENSHIFT_APP_NAME") != "":
 		return getOpenshift()
-	}
-	if strings.Contains(os.Getenv("VCAP_APPLICATION"), ".mybluemix.net") {
+	case strings.Contains(os.Getenv("VCAP_APPLICATION"), ".mybluemix.net"):
 		return getBluemix()
 	}
-	switch os.Getenv("PAAS_VENDOR") {
-	case CLOUD_CONTROL:
-		return getCloudControl()
+
+	switch os.Getenv("DOCKER_VENDOR") {
+	case DAOCLOUD:
+		return getDaocloud()
 	}
 	return getTest()
+}
+
+func getDaocloud() info {
+	domain := os.Getenv("DEFAULT_DOMAIN")
+	return info{
+		Vendor:   DAOCLOUD,
+		BindAddr: fmt.Sprintf(":%v", GetEnv("PORT", "8080")),
+		ApiInfo: ApiInfo{
+			HttpDomain: domain,
+			WsDomain:   domain,
+			WssDomain:  domain,
+		},
+		GormParams: GormParams{
+			Dialect: "mysql",
+			Url: fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
+				os.Getenv("MYSQL_USERNAME"), os.Getenv("MYSQL_PASSWORD"),
+				os.Getenv("MYSQL_PORT_3306_TCP_ADDR"),
+				os.Getenv("MYSQL_INSTANCE_NAME"),
+			),
+			MaxIdle: 10,
+			MaxOpen: 10,
+		},
+	}
 }
 
 func getHeroku() info {
@@ -143,14 +170,24 @@ func getCloudControl() info {
 			MaxOpen: 1,
 		}
 	}
-	return info{
-		Vendor:   CLOUD_CONTROL,
-		BindAddr: fmt.Sprintf(":%v", GetEnv("PORT", "8080")),
-		ApiInfo: ApiInfo{
+	var apiInfo ApiInfo
+	if os.Getenv("DOMAIN") == "dotcloudapp.com" {
+		apiInfo = ApiInfo{
+			HttpDomain: app + "dotcloudapp.com",
+			WsDomain:   app + "dotcloudapp.com",
+			WssDomain:  app + "dotcloudapp.com",
+		}
+	} else {
+		apiInfo = ApiInfo{
 			HttpDomain: app + "cloudcontrolled.com",
 			WsDomain:   app + "cloudcontrolapp.com",
 			WssDomain:  app + "cloudcontrolapp.com",
-		},
+		}
+	}
+	return info{
+		Vendor:   CLOUD_CONTROL,
+		BindAddr: fmt.Sprintf(":%v", GetEnv("PORT", "8080")),
+		ApiInfo:  apiInfo,
 		// first chech Elephant
 		GormParams: g,
 	}
@@ -216,10 +253,10 @@ func getTest() info {
 			WssDomain:  "127.0.0.1:" + PortInTest,
 		},
 		GormParams: GormParams{
-			Dialect: "postgres",
+			Dialect: GetEnv("DB_DIALECT", "postgres"),
 			Url:     url,
-			MaxIdle: 5,
-			MaxOpen: 5,
+			MaxIdle: 10,
+			MaxOpen: 10,
 		},
 	}
 }
