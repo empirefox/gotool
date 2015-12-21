@@ -85,6 +85,34 @@ func GetPaasInfo() info {
 
 func getDaocloud() info {
 	domain := os.Getenv("DEFAULT_DOMAIN")
+	var gps GormParams
+	if os.Getenv("POSTGRESQL_INSTANCE_NAME") != "" {
+		gps = GormParams{
+			Dialect: "postgres",
+			Url: fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+				os.Getenv("POSTGRESQL_USERNAME"),
+				os.Getenv("POSTGRESQL_PASSWORD"),
+				os.Getenv("POSTGRESQL_PORT_5432_TCP_ADDR"),
+				os.Getenv("POSTGRESQL_PORT_5432_TCP_PORT"),
+				os.Getenv("POSTGRESQL_INSTANCE_NAME"),
+			),
+			MaxIdle: 10,
+			MaxOpen: 10,
+		}
+	} else {
+		gps = GormParams{
+			Dialect: "mysql",
+			Url: fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True",
+				os.Getenv("MYSQL_USERNAME"),
+				os.Getenv("MYSQL_PASSWORD"),
+				os.Getenv("MYSQL_PORT_3306_TCP_ADDR"),
+				os.Getenv("MYSQL_PORT_3306_TCP_PORT"),
+				os.Getenv("MYSQL_INSTANCE_NAME"),
+			),
+			MaxIdle: 10,
+			MaxOpen: 10,
+		}
+	}
 	return info{
 		Vendor:   DAOCLOUD,
 		BindAddr: fmt.Sprintf(":%v", GetEnv("PORT", "8080")),
@@ -93,16 +121,7 @@ func getDaocloud() info {
 			WsDomain:   domain,
 			WssDomain:  domain,
 		},
-		GormParams: GormParams{
-			Dialect: "mysql",
-			Url: fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8&parseTime=True",
-				os.Getenv("MYSQL_USERNAME"), os.Getenv("MYSQL_PASSWORD"),
-				os.Getenv("MYSQL_PORT_3306_TCP_ADDR"),
-				os.Getenv("MYSQL_INSTANCE_NAME"),
-			),
-			MaxIdle: 10,
-			MaxOpen: 10,
-		},
+		GormParams: gps,
 	}
 }
 
