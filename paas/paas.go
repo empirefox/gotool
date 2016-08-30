@@ -4,14 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
+
+	"github.com/tidwall/gjson"
 )
 
 const (
 	HEROKU         = "heroku"
 	OPENSHIFT      = "openshift"
-	CLOUD_CONTROL  = "cloudControl"
 	CLOUD_AND_HEAT = "cloudandheat"
 	BLUEMIX        = "bluemix"
 	DAOCLOUD       = "daocloud"
@@ -63,9 +63,6 @@ func init() {
 
 func GetPaasInfo() info {
 	switch {
-	case os.Getenv("PAAS_VENDOR") == CLOUD_CONTROL:
-		// also fit for dotcloud
-		return getCloudControl()
 	case os.Getenv("DYNO") != "":
 		return getHeroku()
 	case os.Getenv("OPENSHIFT_APP_NAME") != "":
@@ -165,51 +162,6 @@ func getOpenshift() info {
 	}
 }
 
-func getCloudControl() info {
-	app := strings.Split(os.Getenv("DEP_NAME"), "/")[0] + "."
-	// gorm
-	g := GormParams{
-		Dialect: "postgres",
-		Url:     os.Getenv("ELEPHANTSQL_URL"),
-		MaxIdle: 4,
-		MaxOpen: 4,
-	}
-	if g.Url == "" {
-		g = GormParams{
-			Dialect: "mysql",
-			Url: fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8",
-				os.Getenv("MYSQLS_USERNAME"),
-				os.Getenv("MYSQLS_PASSWORD"),
-				os.Getenv("MYSQLS_HOSTNAME"),
-				os.Getenv("MYSQLS_PORT"),
-				os.Getenv("MYSQLS_DATABASE")),
-			MaxIdle: 1,
-			MaxOpen: 1,
-		}
-	}
-	var apiInfo ApiInfo
-	if os.Getenv("DOMAIN") == "dotcloudapp.com" {
-		apiInfo = ApiInfo{
-			HttpDomain: app + "dotcloudapp.com",
-			WsDomain:   app + "dotcloudapp.com",
-			WssDomain:  app + "dotcloudapp.com",
-		}
-	} else {
-		apiInfo = ApiInfo{
-			HttpDomain: app + "cloudcontrolled.com",
-			WsDomain:   app + "cloudcontrolapp.com",
-			WssDomain:  app + "cloudcontrolapp.com",
-		}
-	}
-	return info{
-		Vendor:   CLOUD_CONTROL,
-		BindAddr: fmt.Sprintf(":%v", GetEnv("PORT", "8080")),
-		ApiInfo:  apiInfo,
-		// first chech Elephant
-		GormParams: g,
-	}
-}
-
 func getCloudandheat() info {
 	app := strings.Split(os.Getenv("DEP_NAME"), "/")[0] + "."
 	return info{
@@ -235,10 +187,12 @@ func getCloudandheat() info {
 	}
 }
 
-var domainRegexp = regexp.MustCompile(`\"application_uris\"\:\[\"([^\"\s]+)\"\]`)
-
 func getBluemix() info {
-	domain := domainRegexp.FindStringSubmatch(os.Getenv("VCAP_APPLICATION"))[1]
+	domain := gjson.Get(os.Getenv("VCAP_APPLICATION"), "application_uris.0").String()
+	url := os.Getenv("DATABASE_URL")
+	if url == "" {
+		url = gjson.Get(os.Getenv("VCAP_SERVICES"), `elephantsql.0.credentials.uri`).String()
+	}
 	return info{
 		Vendor:   BLUEMIX,
 		BindAddr: fmt.Sprintf("%v:%v", os.Getenv("VCAP_APP_HOST"), os.Getenv("VCAP_APP_PORT")),
@@ -249,7 +203,7 @@ func getBluemix() info {
 		},
 		GormParams: GormParams{
 			Dialect: "postgres",
-			Url:     os.Getenv("DATABASE_URL") + "?sslmode=disable",
+			Url:     url + "?sslmode=disable",
 			MaxIdle: 19,
 			MaxOpen: 19,
 		},
