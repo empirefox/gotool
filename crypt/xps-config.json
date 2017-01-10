@@ -1,0 +1,11 @@
+{
+	"password": "",
+	"files": {
+		"config.json": "xps-files/prod/config.json",
+		"cert.pem": "xps-files/prod/apiclient_cert.pem",
+		"key.pem": "xps-files/prod/apiclient_key.pem",
+		"pay-key.pem": "xps-files/prod/pay-key.pem"
+	},
+	"xps-file": "xps-files/xps-prod.tar.gz",
+	"gzip-level": -1
+}

@@ -1,0 +1,8 @@
+{
+    "Server": {
+        "Port": 8443
+    },
+    "PayService": {
+        "ClientID": "fake_client_id"
+    }
+}

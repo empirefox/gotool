@@ -1,0 +1,7 @@
+{
+    "Server": {
+    },
+    "PayService": {
+        "ClientID": "real_client_id"
+    }
+}
