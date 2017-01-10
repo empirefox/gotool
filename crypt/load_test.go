@@ -3,6 +3,7 @@ package crypt
 import (
 	"testing"
 
+	"github.com/mcuadros/go-defaults"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,9 +34,10 @@ func TestLoadProd(t *testing.T) {
 	assert.Empty(config.Server.Cert)
 	assert.Empty(config.Server.CertIgnored)
 	assert.Equal("prod-key", string(config.Server.Key))
-	assert.Equal(uint(443), config.Server.Port)
 	assert.Equal("real_client_id", config.PayService.ClientID)
 	assert.Equal("prod-paykey", string(config.PayService.Key))
+	defaults.SetDefaults(config)
+	assert.Equal(uint(443), config.Server.Port)
 }
 
 func TestLoadDev(t *testing.T) {

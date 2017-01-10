@@ -45,7 +45,10 @@ func (fs Files) newDefaultFiller() *defaults.Filler {
 			if field.Value.Bytes() != nil {
 				return
 			}
-			field.Value.SetBytes([]byte(fs.Xps[field.TagValue]))
+			v := fs.Xps[field.TagValue]
+			if len(v) > 0 {
+				field.Value.SetBytes(v)
+			}
 		case reflect.Struct:
 			count := field.Value.Len()
 			for i := 0; i < count; i++ {

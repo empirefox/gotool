@@ -51,6 +51,5 @@ func LoadSingleConfigWithOptions(config interface{}, opts *ConfigOptions) error 
 		return err
 	}
 	NewFiles(files, xps.EquipTag).Equip(config)
-	defaults.SetDefaults(config)
 	return nil
 }
