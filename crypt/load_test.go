@@ -8,10 +8,10 @@ import (
 )
 
 type Server struct {
-	Cert        []byte
-	Key         []byte `xps:"key.pem"`
+	Cert        []byte `json:"-"`
+	Key         []byte `json:"-" xps:"key.pem"`
 	CertIgnored string `xps:"cert.pem"` // only accept []byte with xps tag
-	Port        uint   `default:"443"`
+	Port        uint   `env:"PORT" default:"443"`
 }
 
 type PayService struct {
@@ -24,11 +24,15 @@ type Config struct {
 	PayService PayService
 }
 
+func (c *Config) GetEnvPtrs() []interface{} {
+	return []interface{}{&c.Server}
+}
+
 func TestLoadProd(t *testing.T) {
 	assert := assert.New(t)
 
 	config := new(Config)
-	err := LoadSingleConfigWithOptions(config, &ConfigOptions{Password: "yourpassword"})
+	err := LoadConfig(config, &ConfigOptions{Password: "yourpassword"})
 	assert.Nil(err)
 
 	assert.Empty(config.Server.Cert)
@@ -44,7 +48,7 @@ func TestLoadDev(t *testing.T) {
 	assert := assert.New(t)
 
 	config := new(Config)
-	err := LoadSingleConfigWithOptions(config, &ConfigOptions{Mode: "dev"})
+	err := LoadConfig(config, &ConfigOptions{XpsBootConfig: "xps-config-dev.json"})
 	assert.Nil(err)
 
 	assert.Empty(config.Server.Cert)

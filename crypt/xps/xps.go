@@ -11,14 +11,14 @@ import (
 )
 
 var (
-	decryptdir = flag.String("d", "", "Decrypt dir to place files")
+	decryptdir = flag.String("d", "", "Decrypt dir to place files, switch to encrypt mode if not set")
 	password   = flag.String("k", "", "Password")
 	configfile = flag.String("x", "xps-config.json", "Config file for xps")
 )
 
 func main() {
 	flag.Parse()
-	xps, err := crypt.NewXps(*configfile)
+	xps, err := crypt.NewXps(*configfile, "json")
 	if err != nil {
 		panic(err)
 	}

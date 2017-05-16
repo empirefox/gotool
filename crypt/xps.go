@@ -4,13 +4,13 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 
+	"github.com/brentp/xopen"
 	"github.com/mcuadros/go-defaults"
 )
 
@@ -24,18 +24,24 @@ type Xps struct {
 	Files      map[string]string `json:"files,omitempty"`
 	XpsFile    string            `json:"xps-file,omitempty" default:"xps.tar.gz"`
 	GzipLevel  int               `json:"gzip-level"         default:"-1"`
-	ConfigFile string            `json:"config-file"        default:"config.json"` // in xps file
+	ConfigFile string            `json:"config-file"        default:"config.json"` // in xps file: json ymal toml json5
 	EquipTag   string            `json:"equip-tag"          default:"xps"`
 }
 
-func NewXps(filepath string) (*Xps, error) {
-	file, err := os.Open(filepath)
+func NewXps(filepath, filetype string) (*Xps, error) {
+	file, err := xopen.Ropen(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
 
 	xps := new(Xps)
-	err = json.NewDecoder(file).Decode(xps)
+	err = UnmarshalFormat(content, xps, filetype)
 	if err != nil {
 		return nil, err
 	}
